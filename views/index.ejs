@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+            crossorigin="anonymous"
+        />
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"
+        ></script>
+        <script
+            type="text/javascript"
+            src="//dapi.kakao.com/v2/maps/sdk.js?appkey=5e0ecfd1decc9285af9392e3abfe5016&libraries=services"
+        ></script>
+
+        <script src="/autocomplete.js"></script>
+        <script src="/citypos.js"></script>
+    </head>
+    <body>
+        <div class="container vh-100 w-100 py-4" style="box-sizing: border-box">
+            <div
+                class="d-flex h-100 flex-column vertical-center justify-content-center"
+            >
+                <div class="row">
+                    <form onsubmit="searchCity(); return false;">
+                        <div class="input-group mb-3">
+                            <input
+                                type="text"
+                                class="form-control autocomplete"
+                                id="city"
+                                placeholder="검색하고 싶은 지역을 입력하세요..."
+                                aria-label="검색하고 싶은 지역을 입력하세요..."
+                                aria-describedby="button-addon2"
+                            />
+                            <button
+                                class="btn btn-outline-primary"
+                                type="submit"
+                                id="button-addon2"
+                            >
+                                검색
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="row flex-grow-1 overflow-hidden">
+                    <div class="col overflow-auto h-100">
+                        <div class="news">
+                            <ol class="list-group"></ol>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex flex-column w-100 h-100">
+                            <div class="row flex-grow-1">
+                                <div
+                                    id="map"
+                                    style="width: 100%; height: 100%"
+                                ></div>
+                            </div>
+                            <div
+                                class="d-flex flex-lg-row flex-md-column align-items-center gap-2"
+                            >
+                                <span
+                                    ><div class="red-box box"></div>
+                                    기후 변화 위험 지역</span
+                                ><span
+                                    ><div class="yellow-box box"></div>
+                                    기후 변화 주의 지역</span
+                                ><span
+                                    ><div class="blue-box box"></div>
+                                    기후 변화 관심 지역</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <style>
+            .box {
+                display: inline-block;
+                height: 10px;
+                width: 10px;
+                background: gray;
+            }
+
+            .red-box {
+                background: #ff3737;
+            }
+            .yellow-box {
+                background: #ffb219;
+            }
+            .blue-box {
+                background: #1aa3ff;
+            }
+
+            .autocomplete-menu mark {
+                text-decoration: underline;
+                background: none;
+                color: currentColor;
+                padding: 0;
+            }
+
+            /* Optional nicer scrollbars */
+            .autocomplete-menu {
+                --scroller-color: 0, 0%;
+                --scroller-color-lightness: 80%;
+                --scroller-bg-lightness: 90%;
+                --scroller-hover-factor: 0.8;
+                --scroller-thumb: hsl(
+                    var(--scroller-color),
+                    var(--scroller-color-lightness)
+                );
+                /* Replicate hover for webkit */
+                --scroller-thumb-hover: hsl(
+                    var(--scroller-color),
+                    calc(
+                        var(--scroller-color-lightness) *
+                            var(--scroller-hover-factor)
+                    )
+                );
+                --scroller-background: hsl(
+                    var(--scroller-color),
+                    calc(var(--scroller-bg-lightness))
+                );
+                scrollbar-color: var(--scroller-thumb)
+                    var(--scroller-background);
+                scrollbar-width: thin;
+            }
+
+            .autocomplete-menu::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .autocomplete-menu::-webkit-scrollbar-track {
+                background: var(--scroller-background);
+            }
+
+            .autocomplete-menu::-webkit-scrollbar-thumb {
+                background: var(--scroller-thumb);
+            }
+
+            .autocomplete-menu::-webkit-scrollbar-thumb:hover {
+                background: var(--scroller-thumb-hover);
+            }
+        </style>
+        <script type="module">
+            import Autocomplete from "https://cdn.jsdelivr.net/gh/lekoala/bootstrap5-autocomplete@master/autocomplete.js";
+
+            // autocomplete
+            let src = [];
+            for (let i = 0; i < city.length; i++) {
+                src.push({
+                    title: city[i],
+                    id: city[i],
+                    data: {
+                        key: i,
+                    },
+                });
+            }
+            Autocomplete.init("input.autocomplete", {
+                items: src,
+                valueField: "id",
+                labelField: "title",
+                highlightTyped: true,
+            });
+        </script>
+        <script>
+            async function searchCity() {
+                let cityName = document.getElementById("city").value;
+                let newsListElement = document.querySelector("ol.list-group");
+                newsListElement.innerHTML = "로드중...";
+                let res = await fetch(
+                    "/api/news?city=" + encodeURIComponent(cityName)
+                );
+
+                newsListElement.innerHTML = "";
+                let result = await res.json();
+                let news = result.data.items;
+
+                var moveLatLon = new kakao.maps.LatLng(
+                    citypos[cityName].lat,
+                    citypos[cityName].long
+                );
+                map.setCenter(moveLatLon);
+
+                let colors = ["#ff3737", "#ffb219", "#1aa3ff"];
+
+                // dummy data
+                //fucking javascript type casting
+                // console.log(citypos[cityName].lat - Math.random());
+                // console.log(citypos[cityName].lat + Math.random());
+                let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
+
+                var sw = new kakao.maps.LatLng(
+                    parseFloat(citypos[cityName].lat) - getFloat(),
+                    parseFloat(citypos[cityName].long) - getFloat()
+                ); // 사각형 영역의 남서쪽 좌표
+
+                var ne = new kakao.maps.LatLng(
+                    parseFloat(citypos[cityName].lat) + getFloat(),
+                    parseFloat(citypos[cityName].long) + getFloat()
+                ); // 사각형 영역의 북동쪽 좌표
+
+                // 사각형을 구성하는 영역정보를 생성합니다
+                // 사각형을 생성할 때 영역정보는 LatLngBounds 객체로 넘겨줘야 합니다
+                var rectangleBounds = new kakao.maps.LatLngBounds(sw, ne);
+
+                let randomColor = colors[Math.floor(Math.random() * 3)];
+
+                // 지도에 표시할 사각형을 생성합니다
+                var rectangle = new kakao.maps.Rectangle({
+                    bounds: rectangleBounds, // 그려질 사각형의 영역정보입니다
+                    strokeWeight: 2, // 선의 두께입니다
+                    strokeColor: randomColor, // 선의 색깔입니다
+                    strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                    strokeStyle: "solid", // 선의 스타일입니다
+                    fillColor: randomColor, // 채우기 색깔입니다
+                    fillOpacity: 0.8, // 채우기 불투명도 입니다
+                });
+
+                // 지도에 사각형을 표시합니다
+                rectangle.setMap(map);
+
+                for (let i = 0; i < news.length; i++) {
+                    let newsElem = getNewsElement(
+                        news[i].title,
+                        news[i].description,
+                        news[i].link
+                    );
+                    newsListElement.append(newsElem);
+                }
+                return false;
+            }
+
+            function getNewsElement(title, content, link) {
+                let li = document.createElement("li");
+                li.classList.add(
+                    "list-group-item",
+                    "d-flex",
+                    "justify-content-between",
+                    "align-items-start"
+                );
+
+                let div = document.createElement("div");
+                div.classList.add("ms-2", "me-auto");
+
+                let newsTitle = document.createElement("div");
+                newsTitle.classList.add("fw-bold");
+                let a = document.createElement("a");
+                a.target = "_blank";
+                a.href = link;
+                a.innerHTML = title;
+                newsTitle.appendChild(a);
+
+                div.appendChild(newsTitle);
+                div.innerHTML += content;
+
+                li.appendChild(div);
+
+                return li;
+            }
+            var mapContainer = document.getElementById("map"), // 지도를 표시할 div
+                mapOption = {
+                    center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
+                    level: 5, // 지도의 확대 레벨
+                };
+
+            // 지도를 표시할 div와  지도 옵션으로  지도를 생성합니다
+            var map = new kakao.maps.Map(mapContainer, mapOption);
+            map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+            // map.add
+        </script>
+    </body>
+</html>
