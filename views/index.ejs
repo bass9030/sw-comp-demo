@@ -50,9 +50,70 @@
                     </form>
                 </div>
                 <div class="row flex-grow-1 overflow-hidden">
-                    <div class="col overflow-auto h-100">
-                        <div class="news">
-                            <ol class="list-group"></ol>
+                    <div class="col h-100">
+                        <div class="d-flex flex-column h-100 gap-1">
+                            <div
+                                class="news overflow-auto d-flex flex-column w-100"
+                                style="flex-basis: 70%"
+                            >
+                                <h4>관련 뉴스</h4>
+                                <ol class="list-group"></ol>
+                            </div>
+                            <hr style="margin: 10px 0" />
+                            <div
+                                class="recommend d-flex flex-column overflow-auto w-100"
+                                style="flex-basis: 30%"
+                            >
+                                <h4>우리 지역 기후 관련 정보</h4>
+                                <ol class="list-group">
+                                    <li
+                                        class="list-group-item d-flex justify-content-between align-items-start"
+                                    >
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">
+                                                <a href="">
+                                                    기후 변화를 막기 위해 생활
+                                                    속 작은 실천은 어떨까요?</a
+                                                >
+                                            </div>
+                                            해당 지역은 타 지역 대비 기후 변화
+                                            위험 구역이 넓습니다. 기후 변화를
+                                            막기 위한 작은 실천들을 알아보세요!
+                                        </div>
+                                    </li>
+                                    <li
+                                        class="list-group-item d-flex justify-content-between align-items-start"
+                                    >
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">
+                                                <a href="">
+                                                    나무? 그게 기후 변화랑
+                                                    뭔상관인데?</a
+                                                >
+                                            </div>
+                                            해당 지역은 타 지역 대비 산림 지역의
+                                            기후 변화 구역이 넓습니다. 산림이 왜
+                                            중요한지 알아볼까요?
+                                        </div>
+                                    </li>
+                                    <li
+                                        class="list-group-item d-flex justify-content-between align-items-start"
+                                    >
+                                        <div class="ms-2 me-auto">
+                                            <div class="fw-bold">
+                                                <a href="">
+                                                    전등 OFF! 적정온도 20℃!
+                                                    실내에서의 작은 실천들!</a
+                                                >
+                                            </div>
+                                            해당 지역은 타 지역 대비 주거지역의
+                                            기후 변화 구역이 넓습니다. 실내에서
+                                            기후 변화를 막기위한 실천방법들을
+                                            알아보세요!
+                                        </div>
+                                    </li>
+                                </ol>
+                            </div>
                         </div>
                     </div>
                     <div class="col">
@@ -194,39 +255,78 @@
 
                 // dummy data
                 //fucking javascript type casting
-                // console.log(citypos[cityName].lat - Math.random());
-                // console.log(citypos[cityName].lat + Math.random());
-                let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
+                console.log(citypos[cityName].lat);
+                console.log(citypos[cityName].long);
+                // let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
+                // let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
 
-                var sw = new kakao.maps.LatLng(
-                    parseFloat(citypos[cityName].lat) - getFloat(),
-                    parseFloat(citypos[cityName].long) - getFloat()
-                ); // 사각형 영역의 남서쪽 좌표
+                var point1 = new kakao.maps.LatLng(36.58309722, 127.5117306); // 사각형 영역의 남서쪽 좌표
 
-                var ne = new kakao.maps.LatLng(
-                    parseFloat(citypos[cityName].lat) + getFloat(),
-                    parseFloat(citypos[cityName].long) + getFloat()
-                ); // 사각형 영역의 북동쪽 좌표
+                var point2 = new kakao.maps.LatLng(36.58409722, 127.5117306); // 사각형 영역의 남서쪽 좌표
+
+                var point3 = new kakao.maps.LatLng(36.58419722, 127.5097306); // 사각형 영역의 남서쪽 좌표
+
+                // var ne = new kakao.maps.LatLng(
+                //     parseFloat(citypos[cityName].lat) + getFloat(),
+                //     parseFloat(citypos[cityName].long) + getFloat()
+                // ); // 사각형 영역의 북동쪽 좌표
 
                 // 사각형을 구성하는 영역정보를 생성합니다
                 // 사각형을 생성할 때 영역정보는 LatLngBounds 객체로 넘겨줘야 합니다
-                var rectangleBounds = new kakao.maps.LatLngBounds(sw, ne);
+                // var rectangleBounds = new kakao.maps.LatLngBounds(sw, ne);
 
                 let randomColor = colors[Math.floor(Math.random() * 3)];
 
                 // 지도에 표시할 사각형을 생성합니다
-                var rectangle = new kakao.maps.Rectangle({
-                    bounds: rectangleBounds, // 그려질 사각형의 영역정보입니다
+                // var rectangle = new kakao.maps.Rectangle({
+                //     bounds: rectangleBounds, // 그려질 사각형의 영역정보입니다
+                //     strokeWeight: 2, // 선의 두께입니다
+                //     strokeColor: randomColor, // 선의 색깔입니다
+                //     strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                //     strokeStyle: "solid", // 선의 스타일입니다
+                //     fillColor: randomColor, // 채우기 색깔입니다
+                //     fillOpacity: 0.8, // 채우기 불투명도 입니다
+                // });
+
+                // // 지도에 사각형을 표시합니다
+                // rectangle.setMap(map);
+
+                var circle1 = new kakao.maps.Circle({
+                    center: point1, // 원의 중심좌표 입니다
+                    radius: 50, // 미터 단위의 원의 반지름입니다
                     strokeWeight: 2, // 선의 두께입니다
-                    strokeColor: randomColor, // 선의 색깔입니다
+                    strokeColor: colors[0], // 선의 색깔입니다
                     strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
-                    strokeStyle: "solid", // 선의 스타일입니다
-                    fillColor: randomColor, // 채우기 색깔입니다
-                    fillOpacity: 0.8, // 채우기 불투명도 입니다
+                    strokeStyle: "soild", // 선의 스타일 입니다
+                    fillColor: colors[0], // 채우기 색깔입니다
+                    fillOpacity: 0.7, // 채우기 불투명도 입니다
                 });
 
-                // 지도에 사각형을 표시합니다
-                rectangle.setMap(map);
+                var circle2 = new kakao.maps.Circle({
+                    center: point2, // 원의 중심좌표 입니다
+                    radius: 50, // 미터 단위의 원의 반지름입니다
+                    strokeWeight: 2, // 선의 두께입니다
+                    strokeColor: colors[1], // 선의 색깔입니다
+                    strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                    strokeStyle: "soild", // 선의 스타일 입니다
+                    fillColor: colors[1], // 채우기 색깔입니다
+                    fillOpacity: 0.7, // 채우기 불투명도 입니다
+                });
+
+                var circle3 = new kakao.maps.Circle({
+                    center: point3, // 원의 중심좌표 입니다
+                    radius: 50, // 미터 단위의 원의 반지름입니다
+                    strokeWeight: 2, // 선의 두께입니다
+                    strokeColor: colors[2], // 선의 색깔입니다
+                    strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                    strokeStyle: "soild", // 선의 스타일 입니다
+                    fillColor: colors[2], // 채우기 색깔입니다
+                    fillOpacity: 0.7, // 채우기 불투명도 입니다
+                });
+
+                circle1.setMap(map);
+                circle2.setMap(map);
+                circle3.setMap(map);
 
                 for (let i = 0; i < news.length; i++) {
                     let newsElem = getNewsElement(
