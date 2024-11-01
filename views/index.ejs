@@ -20,6 +20,7 @@
             src="//dapi.kakao.com/v2/maps/sdk.js?appkey=5e0ecfd1decc9285af9392e3abfe5016&libraries=services"
         ></script>
 
+        <script src="/html2canvas.min.js"></script>
         <script src="/autocomplete.js"></script>
         <script src="/citypos.js"></script>
     </head>
@@ -54,7 +55,7 @@
                         <div class="d-flex flex-column h-100 gap-1">
                             <div
                                 class="news overflow-auto d-flex flex-column w-100"
-                                style="flex-basis: 70%"
+                                style="flex-basis: 50%"
                             >
                                 <h4>관련 뉴스</h4>
                                 <ol class="list-group"></ol>
@@ -62,10 +63,10 @@
                             <hr style="margin: 10px 0" />
                             <div
                                 class="recommend d-flex flex-column overflow-auto w-100"
-                                style="flex-basis: 30%"
+                                style="flex-basis: 50%"
                             >
                                 <h4>우리 지역 기후 관련 정보</h4>
-                                <ol class="list-group">
+                                <ol class="list-group" style="display: none">
                                     <li
                                         class="list-group-item d-flex justify-content-between align-items-start"
                                     >
@@ -235,8 +236,11 @@
         <script>
             async function searchCity() {
                 let cityName = document.getElementById("city").value;
+                map.setMapTypeId(kakao.maps.MapTypeId.SKYVIEW);
+
                 let newsListElement = document.querySelector("ol.list-group");
                 newsListElement.innerHTML = "로드중...";
+                var level = map.getLevel();
                 let res = await fetch(
                     "/api/news?city=" + encodeURIComponent(cityName)
                 );
@@ -250,8 +254,23 @@
                     citypos[cityName].long
                 );
                 map.setCenter(moveLatLon);
+                setTimeout(async () => {
+                    let dataURL = await html2canvas(
+                        document.querySelector("#map"),
+                        {
+                            allowTaint: true,
+                            useCORS: true,
+                        }
+                    );
+                    document.body.appendChild(dataURL);
+                    console.log(dataURL);
+                    map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
+                }, 2500);
 
+                // 0: 관심 / 1: 주의 / 2: 경고
                 let colors = ["#ff3737", "#ffb219", "#1aa3ff"];
+
+                // TODO: html2canvas 이용하여 위성사진 전송
 
                 // dummy data
                 //fucking javascript type casting
@@ -260,11 +279,11 @@
                 // let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
                 // let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
 
-                var point1 = new kakao.maps.LatLng(36.58309722, 127.5117306); // 사각형 영역의 남서쪽 좌표
+                // var point1 = new kakao.maps.LatLng(36.58309722, 127.5117306); // 사각형 영역의 남서쪽 좌표
 
-                var point2 = new kakao.maps.LatLng(36.58409722, 127.5117306); // 사각형 영역의 남서쪽 좌표
+                // var point2 = new kakao.maps.LatLng(36.58409722, 127.5117306); // 사각형 영역의 남서쪽 좌표
 
-                var point3 = new kakao.maps.LatLng(36.58419722, 127.5097306); // 사각형 영역의 남서쪽 좌표
+                // var point3 = new kakao.maps.LatLng(36.58419722, 127.5097306); // 사각형 영역의 남서쪽 좌표
 
                 // var ne = new kakao.maps.LatLng(
                 //     parseFloat(citypos[cityName].lat) + getFloat(),
@@ -291,42 +310,44 @@
                 // // 지도에 사각형을 표시합니다
                 // rectangle.setMap(map);
 
-                var circle1 = new kakao.maps.Circle({
-                    center: point1, // 원의 중심좌표 입니다
-                    radius: 50, // 미터 단위의 원의 반지름입니다
-                    strokeWeight: 2, // 선의 두께입니다
-                    strokeColor: colors[0], // 선의 색깔입니다
-                    strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
-                    strokeStyle: "soild", // 선의 스타일 입니다
-                    fillColor: colors[0], // 채우기 색깔입니다
-                    fillOpacity: 0.7, // 채우기 불투명도 입니다
-                });
+                // var circle1 = new kakao.maps.Circle({
+                //     center: point1, // 원의 중심좌표 입니다
+                //     radius: 50, // 미터 단위의 원의 반지름입니다
+                //     strokeWeight: 2, // 선의 두께입니다
+                //     strokeColor: colors[0], // 선의 색깔입니다
+                //     strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                //     strokeStyle: "soild", // 선의 스타일 입니다
+                //     fillColor: colors[0], // 채우기 색깔입니다
+                //     fillOpacity: 0.7, // 채우기 불투명도 입니다
+                // });
 
-                var circle2 = new kakao.maps.Circle({
-                    center: point2, // 원의 중심좌표 입니다
-                    radius: 50, // 미터 단위의 원의 반지름입니다
-                    strokeWeight: 2, // 선의 두께입니다
-                    strokeColor: colors[1], // 선의 색깔입니다
-                    strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
-                    strokeStyle: "soild", // 선의 스타일 입니다
-                    fillColor: colors[1], // 채우기 색깔입니다
-                    fillOpacity: 0.7, // 채우기 불투명도 입니다
-                });
+                // var circle2 = new kakao.maps.Circle({
+                //     center: point2, // 원의 중심좌표 입니다
+                //     radius: 50, // 미터 단위의 원의 반지름입니다
+                //     strokeWeight: 2, // 선의 두께입니다
+                //     strokeColor: colors[1], // 선의 색깔입니다
+                //     strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                //     strokeStyle: "soild", // 선의 스타일 입니다
+                //     fillColor: colors[1], // 채우기 색깔입니다
+                //     fillOpacity: 0.7, // 채우기 불투명도 입니다
+                // });
 
-                var circle3 = new kakao.maps.Circle({
-                    center: point3, // 원의 중심좌표 입니다
-                    radius: 50, // 미터 단위의 원의 반지름입니다
-                    strokeWeight: 2, // 선의 두께입니다
-                    strokeColor: colors[2], // 선의 색깔입니다
-                    strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
-                    strokeStyle: "soild", // 선의 스타일 입니다
-                    fillColor: colors[2], // 채우기 색깔입니다
-                    fillOpacity: 0.7, // 채우기 불투명도 입니다
-                });
+                // var circle3 = new kakao.maps.Circle({
+                //     center: point3, // 원의 중심좌표 입니다
+                //     radius: 50, // 미터 단위의 원의 반지름입니다
+                //     strokeWeight: 2, // 선의 두께입니다
+                //     strokeColor: colors[2], // 선의 색깔입니다
+                //     strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                //     strokeStyle: "soild", // 선의 스타일 입니다
+                //     fillColor: colors[2], // 채우기 색깔입니다
+                //     fillOpacity: 0.7, // 채우기 불투명도 입니다
+                // });
 
-                circle1.setMap(map);
-                circle2.setMap(map);
-                circle3.setMap(map);
+                // circle1.setMap(map);
+                // circle2.setMap(map);
+                // circle3.setMap(map);
+                document.querySelector("div.recommend > ol").style.display =
+                    "block";
 
                 for (let i = 0; i < news.length; i++) {
                     let newsElem = getNewsElement(
@@ -369,7 +390,7 @@
             var mapContainer = document.getElementById("map"), // 지도를 표시할 div
                 mapOption = {
                     center: new kakao.maps.LatLng(33.450701, 126.570667), // 지도의 중심좌표
-                    level: 5, // 지도의 확대 레벨
+                    level: 4, // 지도의 확대 레벨
                 };
 
             // 지도를 표시할 div와  지도 옵션으로  지도를 생성합니다
