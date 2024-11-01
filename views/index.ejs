@@ -234,9 +234,29 @@
             });
         </script>
         <script>
+            //https://rss.blog.naver.com/mesns.xml
+
+            function searchCity_KakaoMap(city) {
+                return Promise((resolve, reject) => {
+                    var ps = new kakao.maps.services.Places();
+
+                    // 키워드로 장소를 검색합니다
+                    ps.keywordSearch(
+                        "이태원 맛집",
+                        (data, status, pagination) => {
+                            if (status === kakao.maps.services.Status.OK) {
+                                resolve({ lat: data[0].y, long: data[0].x });
+                            } else {
+                                reject();
+                            }
+                        }
+                    );
+                });
+            }
             async function searchCity() {
                 let cityName = document.getElementById("city").value;
-                map.setMapTypeId(kakao.maps.MapTypeId.SKYVIEW);
+
+                // map.setMapTypeId(kakao.maps.MapTypeId.SKYVIEW);
 
                 let newsListElement = document.querySelector("ol.list-group");
                 newsListElement.innerHTML = "로드중...";
@@ -249,33 +269,57 @@
                 let result = await res.json();
                 let news = result.data.items;
 
-                var moveLatLon = new kakao.maps.LatLng(
-                    citypos[cityName].lat,
-                    citypos[cityName].long
-                );
-                map.setCenter(moveLatLon);
-                setTimeout(async () => {
-                    let dataURL = await html2canvas(
-                        document.querySelector("#map"),
-                        {
-                            allowTaint: true,
-                            useCORS: true,
-                        }
+                if (!!citypos[cityName]) {
+                    var moveLatLon = new kakao.maps.LatLng(
+                        citypos[cityName].lat,
+                        citypos[cityName].long
                     );
-                    document.body.appendChild(dataURL);
-                    console.log(dataURL);
-                    map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
-                }, 2500);
+                    map.setCenter(moveLatLon);
+                } else {
+                    let data = searchCity_KakaoMap(cityName);
+                    map.setCenter(data.y, data.x);
+                }
+
+                let center = map.getCenter();
+                let lat = center.getLat();
+                let lng = center.getLng();
 
                 // 0: 관심 / 1: 주의 / 2: 경고
                 let colors = ["#ff3737", "#ffb219", "#1aa3ff"];
 
-                // TODO: html2canvas 이용하여 위성사진 전송
+                let image = (
+                    await (
+                        await fetch(`/api/map?lat=${lat}&long=${lng}`)
+                    ).json()
+                ).data;
+
+                let formData = new FormData();
+                formData.append("file", atob(image));
+
+                let predit_result = await (
+                    await fetch("https://sw-comp-demo-api.bass9030.dev/image", {
+                        method: "POST",
+                        body: formData,
+                    })
+                ).json();
+
+                var circle1 = new kakao.maps.Circle({
+                    center: map.getCenter(), // 원의 중심좌표 입니다
+                    radius: 50, // 미터 단위의 원의 반지름입니다
+                    strokeWeight: 2, // 선의 두께입니다
+                    strokeColor: colors[predit_result[0] - 2], // 선의 색깔입니다
+                    strokeOpacity: 1, // 선의 불투명도 입니다 1에서 0 사이의 값이며 0에 가까울수록 투명합니다
+                    strokeStyle: "soild", // 선의 스타일 입니다
+                    fillColor: colors[predit_result[0] - 2], // 채우기 색깔입니다
+                    fillOpacity: 0.7, // 채우기 불투명도 입니다
+                });
+
+                circle1.setMap(map);
 
                 // dummy data
                 //fucking javascript type casting
-                console.log(citypos[cityName].lat);
-                console.log(citypos[cityName].long);
+                // console.log(citypos[cityName].lat);
+                // console.log(citypos[cityName].long);
                 // let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
                 // let getFloat = () => Math.random() * (0.001 - 0.01) + 0.001;
 
@@ -294,7 +338,7 @@
                 // 사각형을 생성할 때 영역정보는 LatLngBounds 객체로 넘겨줘야 합니다
                 // var rectangleBounds = new kakao.maps.LatLngBounds(sw, ne);
 
-                let randomColor = colors[Math.floor(Math.random() * 3)];
+                // let randomColor = colors[Math.floor(Math.random() * 3)];
 
                 // 지도에 표시할 사각형을 생성합니다
                 // var rectangle = new kakao.maps.Rectangle({
@@ -396,7 +440,6 @@
             // 지도를 표시할 div와  지도 옵션으로  지도를 생성합니다
             var map = new kakao.maps.Map(mapContainer, mapOption);
             map.setMapTypeId(kakao.maps.MapTypeId.HYBRID);
-            // map.add
         </script>
     </body>
 </html>
